@@ -1,28 +1,28 @@
-import { JobInfoTable } from "@/drizzle/schema";
-import { fetchChatMessages } from "../hume/lib/api";
-import { generateText } from "ai";
-import { google } from "./models/google";
+import { JobInfoTable } from "@/drizzle/schema"
+import { fetchChatMessages } from "../hume/lib/api"
+import { generateText } from "ai"
+import { google } from "./models/google"
 
 export async function generateAiInterviewFeedback({
   humeChatId,
   jobInfo,
   userName,
 }: {
-  humeChatId: string;
+  humeChatId: string
   jobInfo: Pick<
     typeof JobInfoTable.$inferSelect,
     "title" | "description" | "experienceLevel"
-  >;
-  userName: string;
+  >
+  userName: string
 }) {
-  const messages = await fetchChatMessages(humeChatId);
+  const messages = await fetchChatMessages(humeChatId)
 
   const formattedMessages = messages
-    .map((message) => {
+    .map(message => {
       if (message.type !== "USER_MESSAGE" && message.type !== "AGENT_MESSAGE") {
-        return null;
+        return null
       }
-      if (message.messageText == null) return null;
+      if (message.messageText == null) return null
 
       return {
         speaker:
@@ -30,9 +30,9 @@ export async function generateAiInterviewFeedback({
         text: message.messageText,
         emotionFeatures:
           message.role === "USER" ? message.emotionFeatures : undefined,
-      };
+      }
     })
-    .filter((f) => f != null);
+    .filter(f => f != null)
 
   const { text } = await generateText({
     model: google("gemini-2.5-flash"),
@@ -108,7 +108,7 @@ Additional Notes:
 - Refer to the interviewee as "you" in your feedback. This feedback should be written as if you were speaking directly to the interviewee.
 - Include a number rating (out of 10) in the heading for each category (e.g., "Communication Clarity: 8/10") as well as an overall rating at the very start of the response.
 - Stop generating output as soon you have provided the full feedback.`,
-  });
+  })
 
-  return text;
+  return text
 }
