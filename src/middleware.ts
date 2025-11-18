@@ -4,6 +4,7 @@ import { env } from "./data/env/server"
 
 const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
+  "/onboarding(.*)",
   "/",
   "/api/webhooks(.*)",
 ])
