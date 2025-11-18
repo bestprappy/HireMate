@@ -1,13 +1,13 @@
-import arcjet, { detectBot, shield, slidingWindow } from "@arcjet/next"
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
-import { env } from "./data/env/server"
+import arcjet, { detectBot, shield, slidingWindow } from "@arcjet/next";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { env } from "./data/env/server";
 
 const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/onboarding(.*)",
   "/",
   "/api/webhooks(.*)",
-])
+]);
 
 const aj = arcjet({
   key: env.ARCJET_KEY,
@@ -23,19 +23,19 @@ const aj = arcjet({
       max: 100,
     }),
   ],
-})
+});
 
 export default clerkMiddleware(async (auth, req) => {
-  const decision = await aj.protect(req)
+  const decision = await aj.protect(req);
 
   if (decision.isDenied()) {
-    return new Response(null, { status: 403 })
+    return new Response(null, { status: 403 });
   }
 
   if (!isPublicRoute(req)) {
-    await auth.protect()
+    await auth.protect();
   }
-})
+});
 
 export const config = {
   matcher: [
@@ -44,4 +44,4 @@ export const config = {
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
-}
+};
