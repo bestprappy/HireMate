@@ -90,28 +90,32 @@ export async function analyzeResumeForJob({
       ? jobInfo.description.substring(0, maxDescriptionLength) + "..."
       : jobInfo.description;
 
-  return executeWithRetry(async () => {
-    return streamObject({
-      model: google("gemini-2.5-flash"),
-      schema: aiAnalyzeSchema,
-      onFinish: async ({ object }) => {
-        if (onFinish && object) {
-          await onFinish(object);
-        }
+  // Pre-load file data to avoid issues with retries
+  const fileData = await resumeFile.arrayBuffer();
+
+  // streamObject returns immediately, so we can't retry the stream itself
+  // But we can optimize by pre-loading data and handling errors at API level
+  return streamObject({
+    model: google("gemini-2.5-flash"),
+    schema: aiAnalyzeSchema,
+    onFinish: async ({ object }) => {
+      if (onFinish && object) {
+        await onFinish(object);
+      }
+    },
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "file",
+            data: fileData,
+            mimeType: resumeFile.type,
+          },
+        ],
       },
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "file",
-              data: await resumeFile.arrayBuffer(),
-              mimeType: resumeFile.type,
-            },
-          ],
-        },
-      ],
-      system: `You are an expert resume reviewer and hiring advisor.
+    ],
+    system: `You are an expert resume reviewer and hiring advisor.
 
 You will receive a candidate's resume as a file in the user prompt. This resume is being used to apply for a job with the following information:
 
@@ -159,6 +163,5 @@ Other Guidelines:
 - Refer to the candidate as "you" in your feedback. This feedback should be written as if you were speaking directly to the candidate.
 - Stop generating output as soon you have provided the full feedback.
 `,
-    });
   });
 }

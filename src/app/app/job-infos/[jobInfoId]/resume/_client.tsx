@@ -114,11 +114,12 @@ export function ResumePageClient({ jobInfoId }: { jobInfoId: string }) {
   const {
     object: aiAnalysis,
     isLoading,
+    error: analysisError,
     submit: generateAnalysis,
   } = useObject({
     api: "/api/ai/resumes/analyze",
     schema: aiAnalyzeSchema,
-    fetch: (url, options) => {
+    fetch: async (url, options) => {
       const headers = new Headers(options?.headers);
       headers.delete("Content-Type");
 
@@ -128,11 +129,39 @@ export function ResumePageClient({ jobInfoId }: { jobInfoId: string }) {
       }
       formData.append("jobInfoId", jobInfoId);
 
-      return fetch(url, { ...options, headers, body: formData });
+      const response = await fetch(url, {
+        ...options,
+        headers,
+        body: formData,
+      });
+
+      // Check if response is an error (non-streaming JSON response)
+      if (
+        !response.ok &&
+        !response.headers.get("content-type")?.includes("text/plain")
+      ) {
+        try {
+          const errorData = await response.json();
+          if (errorData.error) {
+            throw new Error(errorData.error);
+          }
+        } catch (e) {
+          // If JSON parsing fails, use status text
+          throw new Error(response.statusText || "Failed to analyze resume");
+        }
+      }
+
+      return response;
     },
     onFinish: () => {
       // After analysis is done and saved server-side, refresh latest
       fetchResumeHistory();
+    },
+    onError: (error) => {
+      console.error("Resume analysis error:", error);
+      const errorMessage =
+        error.message || "Failed to analyze resume. Please try again.";
+      toast.error(errorMessage);
     },
   });
 
@@ -157,8 +186,22 @@ export function ResumePageClient({ jobInfoId }: { jobInfoId: string }) {
       return;
     }
 
-    generateAnalysis(null);
+    try {
+      generateAnalysis(null);
+    } catch (error) {
+      console.error("Error starting analysis:", error);
+      toast.error("Failed to start analysis. Please try again.");
+    }
   }
+
+  // Show error toast if analysis fails
+  useEffect(() => {
+    if (analysisError) {
+      const errorMessage =
+        analysisError.message || "Failed to analyze resume. Please try again.";
+      toast.error(errorMessage);
+    }
+  }, [analysisError]);
 
   function handleVersionSelect(versionId: string) {
     setSelectedVersionId(versionId);
@@ -428,7 +471,11 @@ function CategoryAccordionHeader({
   } else if (score >= 8) {
     badge = <Badge variant="success">Excellent</Badge>;
   } else if (score >= 6) {
-    badge = <Badge variant="warning" className="text-white">Ok</Badge>;
+    badge = (
+      <Badge variant="warning" className="text-white">
+        Ok
+      </Badge>
+    );
   } else {
     badge = <Badge variant="destructive">Needs Works</Badge>;
   }

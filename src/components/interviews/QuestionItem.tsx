@@ -1,39 +1,44 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ChevronDownIcon, ChevronRightIcon, Loader2Icon, SparklesIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { IdealAnswer } from "./IdealAnswer"
-import type { Question } from "./QuestionList"
+import { useState } from "react";
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  Loader2Icon,
+  SparklesIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { IdealAnswer } from "./IdealAnswer";
+import type { Question } from "./QuestionList";
 
 export function QuestionItem({
   question,
   index,
   onGenerateAnswer,
 }: {
-  question: Question
-  index: number
-  onGenerateAnswer: (questionId: string) => Promise<void>
+  question: Question;
+  index: number;
+  onGenerateAnswer: (questionId: string) => Promise<void>;
 }) {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleExpand = async () => {
     if (!isExpanded) {
-      setIsExpanded(true)
+      setIsExpanded(true);
       // Generate answer if not already generated
       if (!question.idealAnswer && !isGenerating) {
-        setIsGenerating(true)
+        setIsGenerating(true);
         try {
-          await onGenerateAnswer(question.id)
+          await onGenerateAnswer(question.id);
         } finally {
-          setIsGenerating(false)
+          setIsGenerating(false);
         }
       }
     } else {
-      setIsExpanded(false)
+      setIsExpanded(false);
     }
-  }
+  };
 
   return (
     <div className="border-b last:border-b-0">
@@ -84,6 +89,5 @@ export function QuestionItem({
         </div>
       )}
     </div>
-  )
+  );
 }
-
