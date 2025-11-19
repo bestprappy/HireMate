@@ -3,7 +3,7 @@ import { JsonMessage, ReturnChatEvent } from "hume/api/resources/empathicVoice"
 
 type Message = JsonMessage | ConnectionMessage | ReturnChatEvent
 
-export function condenseChatMessages(messages: Message[]) {
+export function condenseChatMessages(messages: Message[] | any[]) {
   return messages.reduce((acc, message) => {
     const data = getChatEventData(message) ?? getJsonMessageData(message)
     if (data == null || data.content == null) {

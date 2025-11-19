@@ -1,5 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRightIcon, PlusIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  MapPinIcon,
+  PlusIcon,
+  SparklesIcon,
+} from "lucide-react";
 import { Suspense } from "react";
 import Link from "next/link";
 
@@ -19,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { JobInfoForm } from "@/features/jobInfos/components/JobInfoForm";
 import { formatExperienceLevel } from "@/features/jobInfos/lib/formatters";
 import { getCurrentUser } from "@/services/clerk/lib/getCurrentUser";
+import { JobCard } from "@/features/jobInfos/components/JobCard";
 
 // --- Page shell ---
 export default function AppPage() {
@@ -73,77 +79,15 @@ async function JobInfos() {
 
       {/* Optional: search/sort bar could live here */}
 
-      <ul className="grid grid-cols-1 lg:grid-cols-2 gap-6 has-hover:*:not-hover:opacity-70">
+      <ul className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {jobInfos.map((job) => (
           <li key={job.id}>
-            <Card
-              className="
-                h-full transition 
-                hover:shadow-md hover:-translate-y-0.5
-                focus-within:ring-2 focus-within:ring-primary
-                motion-reduce:hover:shadow-none motion-reduce:hover:translate-y-0
-              "
+            <Link
+              href={`/app/job-infos/${job.id}`}
+              aria-label={`Open ${job.name}`}
             >
-              <Link
-                href={`/app/job-infos/${job.id}`}
-                className="flex items-stretch justify-between gap-2 p-4"
-                aria-label={`Open ${job.name}`}
-              >
-                <div className="flex-1 min-w-0">
-                  <CardHeader className="p-0 mb-2">
-                    <CardTitle className="text-xl truncate">
-                      {job.name}
-                    </CardTitle>
-                    {job.title && (
-                      <p className="text-sm text-primary truncate font-semibold">
-                        {job.title}
-                      </p>
-                    )}
-                  </CardHeader>
-
-                  <CardContent className="p-0 text-muted-foreground">
-                    <p className="line-clamp-3">{job.description}</p>
-                  </CardContent>
-
-                  <CardFooter className="p-0 pt-3 flex flex-wrap gap-2">
-                    <Badge variant="outline">
-                      {formatExperienceLevel(job.experienceLevel)}
-                    </Badge>
-                    {/* Updated time if available */}
-                    <span className="text-xs text-muted-foreground ">
-                      {(() => {
-                        const diff =
-                          Date.now() - new Date(job.updatedAt).getTime();
-                        const sec = Math.floor(diff / 1000);
-                        const min = Math.floor(sec / 60);
-                        const hr = Math.floor(min / 60);
-                        const day = Math.floor(hr / 24);
-                        if (day > 0)
-                          return `Last updated ${day} day${
-                            day > 1 ? "s" : ""
-                          } ago`;
-                        if (hr > 0)
-                          return `Last updated ${hr} hour${
-                            hr > 1 ? "s" : ""
-                          } ago`;
-                        if (min > 0)
-                          return `Last updated ${min} minute${
-                            min > 1 ? "s" : ""
-                          } ago`;
-                        return "Last updated just now";
-                      })()}
-                    </span>
-                  </CardFooter>
-                </div>
-
-                <div className="self-center pl-2">
-                  <ArrowRightIcon
-                    className="size-5 opacity-60"
-                    aria-hidden="true"
-                  />
-                </div>
-              </Link>
-            </Card>
+              <JobCard job={job} />
+            </Link>
           </li>
         ))}
 

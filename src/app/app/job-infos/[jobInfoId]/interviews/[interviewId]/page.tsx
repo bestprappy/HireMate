@@ -11,20 +11,16 @@ import { getCurrentUser } from "@/services/clerk/lib/getCurrentUser"
 import { eq } from "drizzle-orm"
 import { cacheTag } from "next/dist/server/use-cache/cache-tag"
 import { notFound } from "next/navigation"
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { MarkdownRenderer } from "@/components/MarkdownRenderer"
-import { Loader2Icon } from "lucide-react"
+import { Loader2Icon, SparklesIcon, RefreshCwIcon } from "lucide-react"
 import { Suspense } from "react"
-import { CondensedMessages } from "@/services/hume/components/CondensedMessages"
 import { condenseChatMessages } from "@/services/hume/lib/condenseChatMessages"
 import { fetchChatMessages } from "@/services/hume/lib/api"
 import { ActionButton } from "@/components/ui/action-button"
 import { generateInterviewFeedback } from "@/features/interviews/actions"
+import { InterviewLayout } from "@/components/interviews/InterviewLayout"
+import type { ScorecardData } from "@/components/interviews/ScorecardSidebar"
+import type { Question } from "@/components/interviews/QuestionList"
+import type { InterviewFeedback } from "@/services/ai/interviews/schemas"
 
 export default async function InterviewPage({
   params,
@@ -75,18 +71,17 @@ export default async function InterviewPage({
                 <ActionButton
                   action={generateInterviewFeedback.bind(null, i.id)}
                 >
+                  <SparklesIcon className="size-4 mr-2" />
                   Generate Feedback
                 </ActionButton>
               ) : (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button>View Feedback</Button>
-                  </DialogTrigger>
-                  <DialogContent className="md:max-w-3xl lg:max-w-4xl max-h-[calc(100%-2rem)] overflow-y-auto flex flex-col">
-                    <DialogTitle>Feedback</DialogTitle>
-                    <MarkdownRenderer>{i.feedback}</MarkdownRenderer>
-                  </DialogContent>
-                </Dialog>
+                <ActionButton
+                  action={generateInterviewFeedback.bind(null, i.id)}
+                  variant="outline"
+                >
+                  <SparklesIcon className="size-4 mr-2" />
+                  Regenerate Feedback
+                </ActionButton>
               )
             }
           />
@@ -94,32 +89,53 @@ export default async function InterviewPage({
         <Suspense
           fallback={<Loader2Icon className="animate-spin size-24 mx-auto" />}
         >
-          <Messages interview={interview} />
+          <InterviewContent interview={interview} />
         </Suspense>
       </div>
     </div>
   )
 }
 
-async function Messages({
+async function InterviewContent({
   interview,
 }: {
-  interview: Promise<{ humeChatId: string | null }>
+  interview: Promise<{
+    id: string
+    humeChatId: string | null
+    feedback: any
+    scorecard: any
+    questions: any
+  }>
 }) {
   const { user, redirectToSignIn } = await getCurrentUser({ allData: true })
   if (user == null) return redirectToSignIn()
-  const { humeChatId } = await interview
+  const interviewData = await interview
+  const { humeChatId } = interviewData
   if (humeChatId == null) return notFound()
 
-  const condensedMessages = condenseChatMessages(
-    await fetchChatMessages(humeChatId)
-  )
+  const messages = await fetchChatMessages(humeChatId)
+  const condensedMessages = condenseChatMessages(messages)
+
+  // Parse feedback from JSON string or object
+  let feedback: InterviewFeedback | null = null
+  if (interviewData.feedback) {
+    try {
+      feedback = typeof interviewData.feedback === "string" 
+        ? JSON.parse(interviewData.feedback) 
+        : interviewData.feedback
+    } catch {
+      feedback = null
+    }
+  }
 
   return (
-    <CondensedMessages
+    <InterviewLayout
+      interviewId={interviewData.id}
       messages={condensedMessages}
       user={user}
-      className="max-w-5xl mx-auto"
+      scorecard={interviewData.scorecard}
+      questions={interviewData.questions}
+      feedback={feedback}
     />
   )
 }
@@ -130,6 +146,15 @@ async function getInterview(id: string, userId: string) {
 
   const interview = await db.query.InterviewTable.findFirst({
     where: eq(InterviewTable.id, id),
+    columns: {
+      id: true,
+      humeChatId: true,
+      feedback: true,
+      scorecard: true,
+      questions: true,
+      createdAt: true,
+      duration: true,
+    },
     with: {
       jobInfo: {
         columns: {

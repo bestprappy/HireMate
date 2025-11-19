@@ -1,40 +1,123 @@
-import { JobInfoTable } from "@/drizzle/schema"
-import { streamObject } from "ai"
-import { google } from "../models/google"
-import { aiAnalyzeSchema } from "./schemas"
+import { JobInfoTable } from "@/drizzle/schema";
+import { streamObject } from "ai";
+import { google } from "../models/google";
+import { aiAnalyzeSchema } from "./schemas";
+import z from "zod";
+
+// Retry configuration for handling model overload
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY = 1000; // 1 second
+const MAX_RETRY_DELAY = 10000; // 10 seconds
+const REQUEST_TIMEOUT = 120000; // 2 minutes
+
+/**
+ * Exponential backoff delay calculator
+ */
+function getRetryDelay(attempt: number): number {
+  const delay = Math.min(
+    INITIAL_RETRY_DELAY * Math.pow(2, attempt),
+    MAX_RETRY_DELAY
+  );
+  // Add jitter to prevent thundering herd
+  return delay + Math.random() * 1000;
+}
+
+/**
+ * Check if error is retryable (rate limit, timeout, or server error)
+ */
+function isRetryableError(error: any): boolean {
+  if (!error) return false;
+  
+  const errorMessage = error.message?.toLowerCase() || "";
+  const errorStatus = error.status || error.statusCode;
+  
+  // Retry on rate limits, timeouts, and 5xx errors
+  return (
+    errorMessage.includes("rate limit") ||
+    errorMessage.includes("quota") ||
+    errorMessage.includes("timeout") ||
+    errorMessage.includes("overload") ||
+    errorMessage.includes("service unavailable") ||
+    errorStatus === 429 ||
+    errorStatus === 503 ||
+    errorStatus === 502 ||
+    (errorStatus >= 500 && errorStatus < 600)
+  );
+}
+
+/**
+ * Execute with retry logic
+ */
+async function executeWithRetry<T>(
+  fn: () => Promise<T>,
+  attempt = 0
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (error: any) {
+    if (attempt < MAX_RETRIES && isRetryableError(error)) {
+      const delay = getRetryDelay(attempt);
+      console.log(
+        `Resume analysis retry attempt ${attempt + 1}/${MAX_RETRIES} after ${delay}ms`,
+        error.message
+      );
+      
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return executeWithRetry(fn, attempt + 1);
+    }
+    throw error;
+  }
+}
 
 export async function analyzeResumeForJob({
   resumeFile,
   jobInfo,
+  onFinish,
 }: {
-  resumeFile: File
+  resumeFile: File;
   jobInfo: Pick<
     typeof JobInfoTable.$inferSelect,
     "title" | "experienceLevel" | "description"
-  >
+  >;
+  onFinish?: (
+    analysis: z.infer<typeof aiAnalyzeSchema>
+  ) => void | Promise<void>;
 }) {
-  return streamObject({
-    model: google("gemini-2.5-flash"),
-    schema: aiAnalyzeSchema,
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "file",
-            data: await resumeFile.arrayBuffer(),
-            mimeType: resumeFile.type,
-          },
-        ],
+  // Truncate job description if too long to reduce token usage
+  const maxDescriptionLength = 3000;
+  const truncatedDescription =
+    jobInfo.description.length > maxDescriptionLength
+      ? jobInfo.description.substring(0, maxDescriptionLength) + "..."
+      : jobInfo.description;
+
+  return executeWithRetry(async () => {
+    return streamObject({
+      model: google("gemini-2.5-flash"),
+      schema: aiAnalyzeSchema,
+      onFinish: async ({ object }) => {
+        if (onFinish && object) {
+          await onFinish(object);
+        }
       },
-    ],
-    system: `You are an expert resume reviewer and hiring advisor.
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "file",
+              data: await resumeFile.arrayBuffer(),
+              mimeType: resumeFile.type,
+            },
+          ],
+        },
+      ],
+      system: `You are an expert resume reviewer and hiring advisor.
 
 You will receive a candidate's resume as a file in the user prompt. This resume is being used to apply for a job with the following information:
 
 Job Description:
 \`\`\`
-${jobInfo.description}
+${truncatedDescription}
 \`\`\`
 Experience Level: ${jobInfo.experienceLevel}
 ${jobInfo.title ? `\nJob Title: ${jobInfo.title}` : ""}
@@ -76,5 +159,6 @@ Other Guidelines:
 - Refer to the candidate as "you" in your feedback. This feedback should be written as if you were speaking directly to the candidate.
 - Stop generating output as soon you have provided the full feedback.
 `,
-  })
+    });
+  });
 }

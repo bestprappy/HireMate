@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/services/clerk/lib/getCurrentUser";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
-import { Navbar } from "./_Navbar";
+import { AppLayoutClient } from "./_AppLayoutClient";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const { userId, user } = await getCurrentUser({ allData: true });
@@ -9,10 +9,5 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   if (userId == null) return redirect("/");
   if (user == null) return redirect("/onboarding");
 
-  return (
-    <div className="h-screen flex flex-col">
-      <Navbar user={user} />
-      <main className="flex-1 flex flex-col overflow-y-auto">{children}</main>
-    </div>
-  );
+  return <AppLayoutClient user={user}>{children}</AppLayoutClient>;
 }

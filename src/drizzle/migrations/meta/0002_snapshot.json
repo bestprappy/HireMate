@@ -1,6 +1,6 @@
 {
-  "id": "a6535ca8-876b-4c6d-89bb-efe91ed704f6",
-  "prevId": "abbb9f82-b9e8-4bc6-90d3-0618ff056992",
+  "id": "35a16111-a3a9-4a8b-8474-7a3caac36b9c",
+  "prevId": "a6535ca8-876b-4c6d-89bb-efe91ed704f6",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -63,6 +63,151 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.resume_versions": {
+      "name": "resume_versions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jobInfoId": {
+          "name": "jobInfoId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fileName": {
+          "name": "fileName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fileType": {
+          "name": "fileType",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fileSize": {
+          "name": "fileSize",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resumeFileBase64": {
+          "name": "resumeFileBase64",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resumePlainText": {
+          "name": "resumePlainText",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "analysis": {
+          "name": "analysis",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "overallScore": {
+          "name": "overallScore",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "atsScore": {
+          "name": "atsScore",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jobMatchScore": {
+          "name": "jobMatchScore",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "writingAndFormattingScore": {
+          "name": "writingAndFormattingScore",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keywordCoverageScore": {
+          "name": "keywordCoverageScore",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "otherScore": {
+          "name": "otherScore",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "resume_versions_userId_users_id_fk": {
+          "name": "resume_versions_userId_users_id_fk",
+          "tableFrom": "resume_versions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "resume_versions_jobInfoId_job_info_id_fk": {
+          "name": "resume_versions_jobInfoId_job_info_id_fk",
+          "tableFrom": "resume_versions",
+          "tableTo": "job_info",
+          "columnsFrom": [
+            "jobInfoId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.job_info": {
       "name": "job_info",
       "schema": "",
@@ -98,6 +243,37 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
+        },
+        "aiSummary": {
+          "name": "aiSummary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tags": {
+          "name": "tags",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "salary": {
+          "name": "salary",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isAiProcessed": {
+          "name": "isAiProcessed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         },
         "userId": {
           "name": "userId",
@@ -347,9 +523,21 @@
           "primaryKey": false,
           "notNull": false
         },
+        "starter_code": {
+          "name": "starter_code",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
         "reference_solution": {
           "name": "reference_solution",
-          "type": "text",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "function_name": {
+          "name": "function_name",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },

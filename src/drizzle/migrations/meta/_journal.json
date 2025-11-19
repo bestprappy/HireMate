@@ -15,6 +15,55 @@
       "when": 1763400000000,
       "tag": "0001_fix_problem_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1763500000000,
+      "tag": "0002_add_starter_code",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1763600000000,
+      "tag": "0003_add_ai_job_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1763700000000,
+      "tag": "0006_add_resume_versions",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1763472022456,
+      "tag": "0005_sticky_northstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1763800000000,
+      "tag": "0007_update_resume_versions_storage",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1763539633529,
+      "tag": "0007_legal_abomination",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1763900000000,
+      "tag": "0008_convert_interview_feedback_to_jsonb",
+      "breakpoints": true
     }
   ]
 }

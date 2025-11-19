@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar } from "drizzle-orm/pg-core"
+import { pgTable, uuid, varchar, jsonb } from "drizzle-orm/pg-core"
 import { createdAt, id, updatedAt } from "../schemaHelpers"
 import { JobInfoTable } from "./jobInfo"
 import { relations } from "drizzle-orm/relations"
@@ -10,7 +10,9 @@ export const InterviewTable = pgTable("interviews", {
     .notNull(),
   duration: varchar().notNull(),
   humeChatId: varchar(),
-  feedback: varchar(),
+  feedback: jsonb(),
+  scorecard: jsonb(),
+  questions: jsonb(),
   createdAt,
   updatedAt,
 })

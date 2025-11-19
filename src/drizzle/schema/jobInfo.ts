@@ -1,16 +1,16 @@
-import { pgEnum, pgTable, varchar } from "drizzle-orm/pg-core"
-import { createdAt, id, updatedAt } from "../schemaHelpers"
-import { UserTable } from "./user"
-import { relations } from "drizzle-orm"
-import { QuestionTable } from "./question"
-import { InterviewTable } from "./interview"
+import { boolean, pgEnum, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { createdAt, id, updatedAt } from "../schemaHelpers";
+import { UserTable } from "./user";
+import { relations } from "drizzle-orm";
+import { QuestionTable } from "./question";
+import { InterviewTable } from "./interview";
 
-export const experienceLevels = ["junior", "mid-level", "senior"] as const
-export type ExperienceLevel = (typeof experienceLevels)[number]
+export const experienceLevels = ["junior", "mid-level", "senior"] as const;
+export type ExperienceLevel = (typeof experienceLevels)[number];
 export const experienceLevelEnum = pgEnum(
   "job_infos_experience_level",
   experienceLevels
-)
+);
 
 export const JobInfoTable = pgTable("job_info", {
   id,
@@ -18,12 +18,19 @@ export const JobInfoTable = pgTable("job_info", {
   name: varchar().notNull(),
   experienceLevel: experienceLevelEnum().notNull(),
   description: varchar().notNull(),
+  aiSummary: text(),
+  aiJobDescription: text(),
+  aiRequirements: text(),
+  tags: text().array(),
+  location: varchar(),
+  salary: varchar(),
+  isAiProcessed: boolean().default(false),
   userId: varchar()
     .references(() => UserTable.id, { onDelete: "cascade" })
     .notNull(),
   createdAt,
   updatedAt,
-})
+});
 
 export const jobInfoRelations = relations(JobInfoTable, ({ one, many }) => ({
   user: one(UserTable, {
@@ -32,4 +39,4 @@ export const jobInfoRelations = relations(JobInfoTable, ({ one, many }) => ({
   }),
   questions: many(QuestionTable),
   interviews: many(InterviewTable),
-}))
+}));

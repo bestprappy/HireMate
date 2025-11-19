@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { generateProblemsForJobAction } from "@/features/problems/actions";
 
-
 import { Loader2Icon, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,7 +13,7 @@ export function GenerateProblemsButton({ jobInfoId }: { jobInfoId: string }) {
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const result = await generateProblemsForJobAction(jobInfoId);
+      const result = await generateProblemsForJobAction(jobInfoId, "EASY");
       if (result.success) {
         toast.success("Problem generated successfully!");
       }

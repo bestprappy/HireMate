@@ -11,6 +11,7 @@ import { and, eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SparklesIcon } from "lucide-react";
 
 export default async function CodingPracticePage({
   params,
@@ -43,6 +44,7 @@ export default async function CodingPracticePage({
           </div>
           <Button asChild size="lg">
             <Link href={`/app/job-infos/${jobInfoId}/coding-practice/generate`}>
+              <SparklesIcon className="mr-2 h-5 w-5" />
               Generate Problem
             </Link>
           </Button>

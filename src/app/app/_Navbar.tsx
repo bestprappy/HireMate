@@ -34,7 +34,7 @@ export function Navbar({ user }: { user: { name: string; imageUrl: string } }) {
   const pathName = usePathname()
 
   return (
-    <nav className="h-header border-b">
+    <nav className="h-header border-b bg-background ">
       <div className="container flex h-full items-center justify-between">
         <Link href="/app" className="flex items-center gap-2">
           <Handshake className="size-8 text-primary" />

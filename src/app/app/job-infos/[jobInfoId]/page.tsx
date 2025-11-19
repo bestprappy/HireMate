@@ -2,54 +2,21 @@ import { BackLink } from "@/components/BackLink";
 import { Skeleton } from "@/components/Skeleton";
 import { SuspendedItem } from "@/components/SuspendedItem";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/drizzle/db";
 import { JobInfoTable } from "@/drizzle/schema";
 import { getJobInfoIdTag } from "@/features/jobInfos/dbCache";
 import { formatExperienceLevel } from "@/features/jobInfos/lib/formatters";
+import { GenerateJobDescriptionButton } from "@/features/jobInfos/components/GenerateJobDescriptionButton";
 import { getCurrentUser } from "@/services/clerk/lib/getCurrentUser";
 import { and, eq } from "drizzle-orm";
-import { ArrowRightIcon } from "lucide-react";
+import {
+  MapPinIcon,
+  DollarSignIcon,
+  BriefcaseBusinessIcon,
+} from "lucide-react";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-
-const options = [
-  {
-    label: "Answer Technical Questions",
-    description:
-      "Challenge yourself with practice questions tailored to your job description.",
-    href: "questions",
-  },
-  {
-    label: "Coding Practice Question",
-    description:
-      "Work through algorithm drills with solution scaffolds and instant feedback.",
-    href: "coding-practice",
-  },
-  {
-    label: "Practice Interviewing",
-    description: "Simulate a real interview with AI-powered mock interviews.",
-    href: "interviews",
-  },
-  {
-    label: "Refine Your Resume",
-    description:
-      "Get expert feedback on your resume and improve your chances of landing an interview.",
-    href: "resume",
-  },
-  {
-    label: "Update Job Description",
-    description: "This should only be used for minor updates.",
-    href: "edit",
-  },
-];
 
 export default async function JobInfoPage({
   params,
@@ -74,64 +41,197 @@ export default async function JobInfoPage({
       <BackLink href="/app">Dashboard</BackLink>
 
       <div className="space-y-6">
+        {/* Header Card */}
         <header className="space-y-4">
-          <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl">
-              <SuspendedItem
-                item={jobInfo}
-                fallback={<Skeleton className="w-48" />}
-                result={(j) => j.name}
-              />
-            </h1>
-            <div className="flex gap-2">
-              <SuspendedItem
-                item={jobInfo}
-                fallback={<Skeleton className="w-12" />}
-                result={(j) => (
-                  <Badge variant="secondary">
-                    {formatExperienceLevel(j.experienceLevel)}
-                  </Badge>
-                )}
-              />
-              <SuspendedItem
-                item={jobInfo}
-                fallback={null}
-                result={(j) => {
-                  return (
-                    j.title && <Badge variant="secondary">{j.title}</Badge>
-                  );
-                }}
-              />
-            </div>
-          </div>
-          <p className="text-muted-foreground line-clamp-3">
-            <SuspendedItem
-              item={jobInfo}
-              fallback={<Skeleton className="w-96" />}
-              result={(j) => j.description}
-            />
-          </p>
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <SuspendedItem
+                      item={jobInfo}
+                      fallback={<Skeleton className="w-48 h-10" />}
+                      result={(j) => (
+                        <CardTitle className="text-3xl font-bold">
+                          {j.name}
+                        </CardTitle>
+                      )}
+                    />
+                    <SuspendedItem
+                      item={jobInfo}
+                      fallback={null}
+                      result={(j) =>
+                        j.title ? (
+                          <p className="text-lg text-muted-foreground">
+                            {j.title}
+                          </p>
+                        ) : null
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Info Boxes Grid */}
+                <SuspendedItem
+                  item={jobInfo}
+                  fallback={<Skeleton className="w-full h-24" />}
+                  result={(j) => (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {j.salary && (
+                        <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                          <DollarSignIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+                          <div>
+                            <p className="text-xs text-muted-foreground font-medium">
+                              Salary
+                            </p>
+                            <p className="text-sm font-semibold">{j.salary}</p>
+                          </div>
+                        </div>
+                      )}
+                      {j.location && (
+                        <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                          <MapPinIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          <div>
+                            <p className="text-xs text-muted-foreground font-medium">
+                              Location
+                            </p>
+                            <p className="text-sm font-semibold">
+                              {j.location}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      <div
+                        className={
+                          j.experienceLevel === "junior"
+                            ? "flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg"
+                            : j.experienceLevel === "mid-level"
+                            ? "flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg"
+                            : "flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
+                        }
+                      >
+                        <BriefcaseBusinessIcon
+                          className={
+                            j.experienceLevel === "junior"
+                              ? "h-5 w-5 text-blue-600 dark:text-blue-400"
+                              : j.experienceLevel === "mid-level"
+                              ? "h-5 w-5 text-yellow-600 dark:text-yellow-400"
+                              : "h-5 w-5 text-red-600 dark:text-red-400"
+                          }
+                        />
+                        <div>
+                          <p className="text-xs text-muted-foreground font-medium">
+                            Experience
+                          </p>
+                          <p className="text-sm font-semibold">
+                            {formatExperienceLevel(j.experienceLevel)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                />
+
+                {/* Tags */}
+                <SuspendedItem
+                  item={jobInfo}
+                  fallback={null}
+                  result={(j) => {
+                    if (!j.tags || j.tags.length === 0) return null;
+                    return (
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        {j.tags.map((tag, idx) => (
+                          <Badge key={idx} variant="outline">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    );
+                  }}
+                />
+              </div>
+            </CardHeader>
+          </Card>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 has-hover:*:not-hover:opacity-70">
-          {options.map((option) => (
-            <Link
-              className="hover:scale-[1.02] transition-[transform_opacity]"
-              href={`/app/job-infos/${jobInfoId}/${option.href}`}
-              key={option.href}
-            >
-              <Card className="h-full flex items-start justify-between flex-row">
-                <CardHeader className="flex-grow">
-                  <CardTitle>{option.label}</CardTitle>
-                  <CardDescription>{option.description}</CardDescription>
+        {/* AI Generated Content or Fallback */}
+        <SuspendedItem
+          item={jobInfo}
+          fallback={<Skeleton className="w-full h-64" />}
+          result={(j) => {
+            const hasAiContent =
+              j.isAiProcessed && j.aiJobDescription && j.aiRequirements;
+
+            if (hasAiContent) {
+              return (
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-2xl font-bold">
+                        Job Description
+                      </CardTitle>
+                      <GenerateJobDescriptionButton
+                        jobInfoId={j.id}
+                        isAiProcessed={j.isAiProcessed || false}
+                      />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Job Description Section */}
+                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                      {j.aiJobDescription
+                        ?.split("\n\n")
+                        .map((paragraph, idx) => (
+                          <p
+                            key={idx}
+                            className="mb-3 last:mb-0 text-muted-foreground"
+                          >
+                            {paragraph}
+                          </p>
+                        ))}
+                    </div>
+
+                    {/* Requirements Section */}
+                    <div className="space-y-3">
+                      <h3 className="text-2xl font-semibold">Requirements</h3>
+                      <div className="prose prose-sm max-w-none dark:prose-invert">
+                        <div className="space-y-1">
+                          {j.aiRequirements?.split("\n").map((req, idx) => (
+                            <p key={idx} className="ml-0 text-muted-foreground">
+                              {req}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            // Fallback to original description
+            return (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xl font-semibold">
+                      Description
+                    </CardTitle>
+                    <GenerateJobDescriptionButton
+                      jobInfoId={j.id}
+                      isAiProcessed={j.isAiProcessed || false}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <ArrowRightIcon className="size-6" />
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {j.description}
+                  </p>
                 </CardContent>
               </Card>
-            </Link>
-          ))}
-        </div>
+            );
+          }}
+        />
       </div>
     </div>
   );

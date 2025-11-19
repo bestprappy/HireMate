@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { experienceLevels, JobInfoTable } from "@/drizzle/schema/jobInfo"
-import { Button } from "@/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { experienceLevels, JobInfoTable } from "@/drizzle/schema/jobInfo";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,23 +13,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { jobInfoSchema } from "../schemas"
-import { formatExperienceLevel } from "../lib/formatters"
-import { LoadingSwap } from "@/components/ui/loading-swap"
-import { createJobInfo, updateJobInfo } from "../actions"
-import { toast } from "sonner"
+} from "@/components/ui/select";
+import { jobInfoSchema } from "../schemas";
+import { formatExperienceLevel } from "../lib/formatters";
+import { LoadingSwap } from "@/components/ui/loading-swap";
+import { createJobInfo, updateJobInfo } from "../actions";
+import { toast } from "sonner";
+import { SparklesIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-type JobInfoFormData = z.infer<typeof jobInfoSchema>
+type JobInfoFormData = z.infer<typeof jobInfoSchema>;
 
 export function JobInfoForm({
   jobInfo,
@@ -37,8 +39,9 @@ export function JobInfoForm({
   jobInfo?: Pick<
     typeof JobInfoTable.$inferSelect,
     "id" | "name" | "title" | "description" | "experienceLevel"
-  >
+  >;
 }) {
+  const router = useRouter();
   const form = useForm<JobInfoFormData>({
     resolver: zodResolver(jobInfoSchema),
     defaultValues: jobInfo ?? {
@@ -47,16 +50,19 @@ export function JobInfoForm({
       description: "",
       experienceLevel: "junior",
     },
-  })
+  });
 
   async function onSubmit(values: JobInfoFormData) {
     const action = jobInfo
       ? updateJobInfo.bind(null, jobInfo.id)
-      : createJobInfo
-    const res = await action(values)
+      : createJobInfo;
+    const res = await action(values);
 
     if (res.error) {
-      toast.error(res.message)
+      toast.error(res.message);
+    } else if (res.jobInfoId) {
+      toast.success("Job information generated successfully!");
+      router.push(`/app/job-infos/${res.jobInfoId}`);
     }
   }
 
@@ -91,7 +97,7 @@ export function JobInfoForm({
                   <Input
                     {...field}
                     value={field.value ?? ""}
-                    onChange={e => field.onChange(e.target.value || null)}
+                    onChange={(e) => field.onChange(e.target.value || null)}
                   />
                 </FormControl>
                 <FormDescription>
@@ -116,7 +122,7 @@ export function JobInfoForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {experienceLevels.map(level => (
+                    {experienceLevels.map((level) => (
                       <SelectItem key={level} value={level}>
                         {formatExperienceLevel(level)}
                       </SelectItem>
@@ -156,10 +162,13 @@ export function JobInfoForm({
           className="w-full"
         >
           <LoadingSwap isLoading={form.formState.isSubmitting}>
-            Save Job Information
+            <div className="flex items-center">
+              <SparklesIcon className="size-4 mr-2" />
+              Generate Job Information
+            </div>
           </LoadingSwap>
         </Button>
       </form>
     </Form>
-  )
+  );
 }

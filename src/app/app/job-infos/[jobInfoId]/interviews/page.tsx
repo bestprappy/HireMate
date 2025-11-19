@@ -120,7 +120,7 @@ function InterviewGrid({
   }>;
 }) {
   return (
-    <ul className="grid grid-cols-1 lg:grid-cols-2 gap-6 has-hover:*:not-hover:opacity-70">
+    <ul className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* New interview tile */}
       <li>
         <Card className="h-full border-dashed shadow-none">

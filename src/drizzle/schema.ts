@@ -5,3 +5,5 @@ export * from "./schema/question";
 export * from "./schema/problem";
 export * from "./schema/testCase";
 export * from "./schema/submission";
+export * from "./schema/applicationMaterials";
+export * from "./schema/resumeVersion";
