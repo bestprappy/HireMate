@@ -419,23 +419,14 @@ npm run db:migrate
 npm run dev
 ```
 
----
-
-## GitHub Repository
-
-**Repository URL**: [To be updated with your GitHub repository link]
-
-**Note**: Please update this section with your actual GitHub repository URL before submission.
-
----
-
 ## References & Credits
 
 ### Tutorial & Base Code
 
 - **WebDevSimplified Tutorial**: Initial project structure and core features based on "AI-Powered Job Prep" tutorial by webdev-simplify
   - License: MIT
-  - Base repository: `ai-powered-job-prep-by-webdev-simplify`
+  - Base repository: `[ai-powered-job-prep-by-webdev-simplify](https://github.com/WebDevSimplified/ai-powered-job-prep)`
+  - YoutubeLink: `https://youtu.be/xrrtYNr7ZEw?si=7YhkKz0mdLHTbg4w`
 
 ### AI Services & Models
 
@@ -464,29 +455,6 @@ npm run dev
 - Drizzle ORM Documentation: https://orm.drizzle.team/docs/overview
 - Vercel AI SDK Documentation: https://sdk.vercel.ai/docs
 - TypeScript Documentation: https://www.typescriptlang.org/docs/
-
----
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-## Team Members
-
-[To be updated with your team members' names]
-
----
-
-## Submission Information
-
-- **Project Name**: HireMate - AI-Powered Job Preparation Platform
-- **Submission Date**: November 19, 2025
-- **Course**: [Course Name]
-- **Instructor**: [Instructor Name]
-
----
 
 ## Additional Notes
 
