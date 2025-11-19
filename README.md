@@ -406,6 +406,8 @@ cp .env.example .env
 4. Set up database
 
 ```bash
+docker compose up
+# then
 npm run db:push
 # or
 npm run db:migrate
