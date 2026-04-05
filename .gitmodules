@@ -6,3 +6,7 @@
 	path = server
 	url = https://github.com/bestprappy/Server-HireMate.git
 	branch = main
+[submodule "mobile"]
+	path = mobile
+	url = https://github.com/bestprappy/Mobile-HireMate.git
+	branch = main
