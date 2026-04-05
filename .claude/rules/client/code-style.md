@@ -35,6 +35,16 @@ Hard rules:
 16. Follow `.claude/rules/client/styling-guide.md` for all styling decisions.
 17. Do not use any; define clear TypeScript types/interfaces.
 18. Keep each file focused and production-ready.
+19. **Always check for and handle runtime errors:**
+
+- Wrap all async operations, API calls, and data fetching in error handling (try-catch or TanStack Query error states).
+- Use React Error Boundaries for component-level error catching and graceful UI fallbacks.
+- Never assume data will be in expected format; validate shapes and handle null/undefined fields.
+- Log errors with context (component name, operation, user action) for debugging.
+- Display user-friendly error messages while logging detailed errors for developers.
+- Always test edge cases: network failures, empty states, malformed responses, timeout scenarios.
+- Use TypeScript to catch type mismatches at compile time; never rely on runtime alone.
+- Add fallback UI states for loading, error, and empty scenarios in every feature.
 
 Folder structure sections:
 
@@ -104,3 +114,6 @@ Quality gate before final output:
 9. Accessibility is enforced (focus handling, keyboard navigation, ARIA/roles where needed).
 10. SOLID and performance constraints satisfied.
 11. Folder structure choice is explicit and appropriate for the project scale.
+12. **Runtime error handling is implemented:** All async operations have error states, components have fallback UI, data shapes are validated, and errors are logged with sufficient context.
+13. **Error Boundaries wrap risky component subtrees** to prevent cascading failures.
+14. **Edge cases are tested:** null/undefined data, network failures, timeouts, malformed responses.

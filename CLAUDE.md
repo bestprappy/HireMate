@@ -40,7 +40,7 @@ Keep V1.1 and V2 features out of implementation unless explicitly requested.
 
 ## Frontend Standards
 
-Follow .claude/rules/client/code-style.md and .claude/rules/client/styling-guide.md.
+Follow `.claude/rules/client/code-style.md` and `.claude/rules/client/styling-guide.md.`
 
 Key requirements:
 
@@ -56,7 +56,7 @@ Key requirements:
 
 ## Backend Standards
 
-Follow .claude/rules/server/code-style.md, .claude/rules/server/api-conventions.md, and .claude/rules/server/testing.md.
+Follow `.claude/rules/server/code-style.md`, `.claude/rules/server/api-conventions.md`, and `.claude/rules/server/testing.md.`
 
 Key requirements:
 
@@ -139,3 +139,18 @@ When reviewing:
 
 - Prioritize correctness, security, regression risk, and missing tests.
 - Report high-confidence issues first with concrete fixes.
+
+## Local Development
+
+- Client runs on port 3000: `cd client && npm run dev`
+- Server runs on port 8080: `cd server && go run ./cmd/server`
+- Copy .env.example to .env and fill required values before running
+
+## Submodule Notes
+
+- client, server, mobile are git submodules
+- Do not commit parent repo pointer changes without explicit request
+
+## Auth Provider
+
+- Clerk is the auth provider for both frontend and backend JWT validation
