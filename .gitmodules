@@ -1,0 +1,8 @@
+[submodule "Client-HireMate"]
+	path = Client-HireMate
+	url = https://github.com/bestprappy/Client-HireMate.git
+	branch = main
+[submodule "Server-HireMate"]
+	path = Server-HireMate
+	url = https://github.com/bestprappy/Server-HireMate.git
+	branch = main
